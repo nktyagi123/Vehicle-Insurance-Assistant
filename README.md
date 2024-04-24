@@ -1,0 +1,1 @@
+Defective Part Detection and Cost Estimation using Gemini Pro Model

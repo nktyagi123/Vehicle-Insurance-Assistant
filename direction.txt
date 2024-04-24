@@ -1,0 +1,74 @@
+def get_gemini_responses(images, input_text, bmi, user_name, meal):
+    model = genai.GenerativeModel('gemini-pro-vision')
+    consolidated_response = ""
+    for image in images:
+        response = get_gemini_response(image, input_text, bmi, user_name, meal, model)
+        consolidated_response += response + "\n"  # Concatenate individual responses with a newline
+    return consolidated_response
+
+
+Again pass response to another get_gemini response function to get details of defective parts..........
+
+# Usage example
+images = input_image_setup(uploaded_files)
+consolidated_response = get_gemini_responses(images, input_text, bmi, user_name, meal)
+print(consolidated_response)
+
+
+def get_gemini_responses(images, input_text, bmi, user_name, meal):
+    model = genai.GenerativeModel('gemini-pro-vision')
+    responses = []
+    for image in images:
+        response = get_gemini_response(image, input_text, bmi, user_name, meal, model)
+        responses.append(response)
+    return responses
+
+def get_gemini_response(image, input_text, bmi, user_name, meal, model):
+    template = """
+    You are an expert in nutritionist where you need to see the food items from the image
+    and calculate the total calories, also provide the details of every food items with calories intake
+    in the below format:
+
+    Hi {user_name}, Good Day!
+
+    Your Body Mass Index (BMI) is {bmi}.
+
+    Food Items:
+
+    1. Item 1 - no of calories
+    2. Item 2 - no of calories
+    ----
+    ----
+
+    Finally, you can also mention whether the food is healthy or not according to
+    my BMI is {bmi} and I have {input_text} health issue and based on my {meal} time, I am taking painkiller and Antibiotic.
+    Also mention the 
+    percentage split of carbohydrates, fats, fiber, sugar, and other important things required in our diet is as follows
+    """
+
+    # Create an instance of PromptTemplate
+    prompt = PromptTemplate(input_variables=["input_text", "bmi", "user_name", "meal"], template=template)
+
+    filled_prompt = prompt.fill_template(input_text=input_text, bmi=bmi, user_name=user_name, meal=meal)
+
+    response = model.generate_content([image, filled_prompt])
+    return response.text
+
+def input_image_setup(uploaded_files):
+    image_parts_list = []
+    if uploaded_files is not None:
+        for uploaded_file in uploaded_files:
+            bytes_data = uploaded_file.getvalue()
+            image_parts_list.append({
+                "mime_type": uploaded_file.type,
+                "data": bytes_data
+            })
+    else:
+        raise FileNotFoundError("No files uploaded")
+    return image_parts_list
+
+# Usage example
+images = input_image_setup(uploaded_files)
+responses = get_gemini_responses(images, input_text, bmi, user_name, meal)
+for response in responses:
+    print(response)
