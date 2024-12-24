@@ -14,10 +14,13 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 # Function to load Google Gemini Pro Vision API And get response
 def get_gemini_response(image, input_text):
     model = genai.GenerativeModel('gemini-pro-vision')
-    template = """
-    You are an expert to Defect analyser where you need to see the defective items from the image
+    template1 = """
+    You are an expert to get model name, vehicle type, and as a Defect analyser where you need to see the defective items from the image
                and calculate the total cost to replace it, also provide the details of every defective items with cost 
                in below format
+
+               Vehicle Type : \n
+               \nModel Name : 
 
             Also get the details of cost for some parts from this {input_text}
 
@@ -28,6 +31,18 @@ def get_gemini_response(image, input_text):
                ----
                ----
 
+    """
+    template = """
+    You are an Expert assistant for Vehicle Damage assessment and cost estimate for a Vehicle Insurance solution. Follow the below instructions:-
+
+    1. Mandatorily provide a brief description of the vehicle including its model, color, vehicle type, damaged parts, and severity.
+    2. Mandatorily Explain the damaged parts along with its location on the vehicle.
+    3. Provide an precise cost estimation of the top 5 damaged parts and total damage cost.
+ 
+    Damage assessment :
+
+               1. Item 1 - cost in $
+               2. Item 2 - cost in $
     """
 
     # Create an instance of PromptTemplate
@@ -62,9 +77,9 @@ streamlit_version = st.__version__.split(".")[0]
 
 # Set a wider page layout
 st.set_page_config(page_title="Defect Inspector", page_icon="🧊")
-st.header("Defect Inspector", divider='rainbow')
+st.header("GenAI Based Vehicle Insurance Assistant", divider='rainbow')
 # Inputs
-input_text = st.text_input("Enter the cost of items you have (optional):", value="")
+input_text = "None"#st.text_input("Enter the cost of items you have (optional):", value="")
 uploaded_files = st.file_uploader("Choose images files...", accept_multiple_files=True)
 if uploaded_files is not None:
   col1, col2, col3 = st.columns(3)  # Adjust number of columns based on preference
@@ -93,6 +108,8 @@ def get_gemini_response1(consolidated_response):
     {consolidated_response}
 
     Provide the list of defective items with their associated costs in the format:
+    Vehicle Type : \n
+    Model Name :
 
     1. Item 1 - cost in $
     2. Item 2 - cost in $
@@ -113,18 +130,17 @@ def get_gemini_response1(consolidated_response):
 # If submit button is clicked
 if submit:
     if uploaded_files is None:
-       print(11111111232332423423623456)
        st.error("Please upload an image of the defect to proceed. Image upload is mandatory!")
     else:
-        st.subheader(":red[*Defective Parts*]", divider='rainbow')
+        st.subheader(":red[*Analysis and Damage Assessment*]", divider='rainbow')
         image_data = input_image_setup(uploaded_files)
-        st.success("Analysing..")
+        #st.success("Analysing..")
         consolidated_response = ""
         for image in image_data:
             response = get_gemini_response(image, input_text)
             consolidated_response += response + "\n"  # Concatenate individual responses with a newline
         
-        st.success("Generating Response", icon="✅")
-        response = get_gemini_response1(consolidated_response)
+        #st.success("Generating Response", icon="✅")
+        #response = get_gemini_response1(consolidated_response)
         #st.markdown(":red[*Defective Parts*]")
         st.write(response)
